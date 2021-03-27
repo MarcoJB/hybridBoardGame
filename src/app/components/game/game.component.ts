@@ -25,8 +25,9 @@ export class GameComponent implements OnInit {
   streamVideos = {};
   streamContexts = {};
   streamCanvas = {};
-  peerSelectedColors = {};
   socket;
+  debug = false;
+  streamActive = {};
 
   public ngOnInit(): void {
   }
@@ -52,11 +53,11 @@ export class GameComponent implements OnInit {
           this.connectState = 2;
           this.uuid = message.data.uuid;
           this.socket.send(JSON.stringify(new Message("HELLO", 0)));
-          console.log("Connected to Socket Server.");
+          console.log("Connected to Socket Server. UUID: " + this.uuid);
           break;
         case "HELLO":
           if (message.data === 1) {
-            this.socket.send(JSON.stringify(new Message("REQUEST")));
+            this.socket.send(JSON.stringify(new Message("REQUEST", null, message.from)));
             console.log("New Camera activated.");
           } else {
             console.log("New Player joined.");
@@ -119,15 +120,19 @@ export class GameComponent implements OnInit {
   }
 
   createStreamVideo(client: string, stream): void {
+    this.streamActive[client] = false;
+
     const video = document.createElement("video");
     video.srcObject = stream;
     video.play();
     this.streamVideos[client] = video;
+    if (this.debug) {
+      document.getElementById("streams").parentNode.appendChild(video);
+    }
 
     const canvas = document.createElement("canvas");
     canvas.width = 480;
     canvas.height = 480;
-    document.getElementById("streams").appendChild(canvas);
     this.streamCanvas[client] = canvas;
     this.streamContexts[client] = canvas.getContext("2d");
   }
@@ -157,7 +162,15 @@ export class GameComponent implements OnInit {
     for (const uuid of Object.keys(this.streamVideos)) {
       this.streamContexts[uuid].drawImage(this.streamVideos[uuid], 0, 0, 480, 480);
 
-      if (this.selectedColors) {
+      if (!this.streamActive[uuid]) {
+        const imgData = this.streamContexts[uuid].getImageData(0, 0, 1, 1).data;
+        if (Math.max(imgData[0], imgData[1], imgData[2]) > 0) {
+          this.streamActive[uuid] = true;
+          document.getElementById("streams").appendChild(this.streamCanvas[uuid]);
+        }
+      }
+
+      if (this.streamContexts[uuid] && this.selectedColors) {
         const frame = this.streamContexts[uuid].getImageData(0, 0, 480, 480);
         this.escapeImageData(frame, this.selectedColors);
         this.streamContexts[uuid].putImageData(frame, 0, 0);

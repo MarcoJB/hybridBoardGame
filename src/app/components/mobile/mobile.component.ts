@@ -30,6 +30,7 @@ export class MobileComponent implements OnInit {
   uuid: string;
   peers = {};
   socket;
+  debug = false;
 
   public ngOnInit(): void {
     this.webcamVideo = document.createElement("video");
@@ -41,6 +42,10 @@ export class MobileComponent implements OnInit {
     this.unescapedVideo.width = 480;
     this.unescapedVideo.height = 480;
     this.unescapedVideoContext = this.unescapedVideo.getContext("2d");
+
+    if (this.debug) {
+      document.getElementById("preview").parentNode.appendChild(this.unescapedVideo);
+    }
 
     this.connectSocketServer();
 
@@ -71,7 +76,7 @@ export class MobileComponent implements OnInit {
         case "INIT":
           this.uuid = message.data.uuid;
           this.socket.send(JSON.stringify(new Message("HELLO", 1)));
-          console.log("Connected to Socket Server.");
+          console.log("Connected to Socket Server. UUID: " + this.uuid);
           break;
         case "HELLO":
           if (message.data === 1) {
