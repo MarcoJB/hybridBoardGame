@@ -14,6 +14,7 @@ import {MatButtonModule} from "@angular/material/button";
 import { MobileComponent } from "./components/mobile/mobile.component";
 import { GameComponent } from "./components/game/game.component";
 import { AppRoutingModule } from "./app-routing.module";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { AppRoutingModule } from "./app-routing.module";
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatProgressBarModule
   ],
   providers: [],
   bootstrap: [AppComponent]
