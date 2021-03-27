@@ -65,21 +65,9 @@ export class GameComponent implements OnInit {
         case "OFFER":
           console.log("Received Offer from " + message.from);
           if (!this.peers.hasOwnProperty(message.from)) {
-            this.peers[message.from] = new Peer();
-            this.peers[message.from].on("signal", data => {
-              this.socket.send(JSON.stringify(new Message("ANSWER", data, this.uuid, message.from)));
-            });
-            this.peers[message.from].on("connect", () => {
-              console.log("Connected with " + message.from);
-            });
-            this.peers[message.from].on("stream", stream => {
-              console.log("Stream incoming from " + message.from);
-              this.createStreamVideo(message.from, stream);
-            });
+            this.initiatePeerConnection(message.from);
           }
-
           this.peers[message.from].signal(message.data);
-
           break;
         default:
           console.log(message);
