@@ -1,0 +1,31 @@
+
+<div id="settings">
+  <span>
+    Kamera:
+    <mat-form-field *ngIf="mediaDevices.length">
+      <mat-label>Camera</mat-label>
+      <mat-select [(ngModel)]="selectedMediaDeviceId" (selectionChange)="cameraSelected()">
+        <mat-option *ngFor="let mediaDevice of mediaDevices" [value]="mediaDevice.deviceId">
+          {{mediaDevice.label}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </span>
+  <span>
+    Distanz-Exponent: <mat-slider id="exponent" min="0.5" max="5"  step="0.1" [(ngModel)]="distanceExponent"
+                                  (input)="distanceExponent=$event.value"></mat-slider> {{distanceExponent}}
+  </span>
+  <span>
+    Toleranz: <mat-slider id="tolerance" min="1" max="2000" [(ngModel)]="tolerance"
+                          (input)="tolerance=$event.value"></mat-slider> {{tolerance}}
+  </span>
+  <button mat-raised-button (click)="resetColors();">Reset Colors</button>
+</div>
+<div id="videos">
+  <video #webcamStream id="webcam_video"></video>
+  <canvas #analysedVideo id="analysed_video"></canvas>
+  <canvas #unescapedVideo id="unescaped_video" width="480" height="480" (click)="selectColor($event)"></canvas>
+  <div id="streams">
+    <canvas #escapedVideo id="escaped_video" width="480" height="480"></canvas>
+  </div>
+</div>

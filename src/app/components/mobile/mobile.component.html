@@ -1,0 +1,13 @@
+<div id="settings">
+  <mat-form-field id="camera_select" *ngIf="mediaDevices.length">
+    <mat-label>Camera</mat-label>
+    <mat-select [(ngModel)]="selectedMediaDeviceId" (selectionChange)="cameraSelected()">
+      <mat-option *ngFor="let mediaDevice of mediaDevices" [value]="mediaDevice.deviceId">
+        {{mediaDevice.label}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<div id="preview">
+  <canvas id="analysed_video"></canvas>
+</div>

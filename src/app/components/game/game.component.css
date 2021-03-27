@@ -1,0 +1,38 @@
+#settings {
+  margin: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#settings > * {
+  margin: 0 20px;
+}
+
+#videos {
+  text-align: center;
+}
+
+#webcam_video, ::ng-deep #videos > canvas, #streams {
+  height: 480px;
+  margin: 5px;
+  position: relative;
+  border: solid 1px #999;
+}
+
+#streams {
+  position: relative;
+  display: inline-block;
+  width: 480px;
+  height: 480px;
+  background-image: url(/assets/mensch_ärgere_dich_nicht.png);
+  background-size: 100%;
+}
+
+::ng-deep #streams canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 480px;
+  height: 480px;
+}
