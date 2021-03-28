@@ -11,10 +11,16 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatSelectModule} from "@angular/material/select";
 import {MatButtonModule} from "@angular/material/button";
+import { MobileComponent } from "./components/mobile/mobile.component";
+import { GameComponent } from "./components/game/game.component";
+import { AppRoutingModule } from "./app-routing.module";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    MobileComponent,
+    GameComponent
   ],
   imports: [
     BrowserModule,
@@ -26,7 +32,9 @@ import {MatButtonModule} from "@angular/material/button";
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule
+    MatButtonModule,
+    AppRoutingModule,
+    MatProgressBarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,0 +1,4 @@
+<button mat-raised-button color="primary" (click)="init()" *ngIf="connectState == 0">Connect</button>
+<mat-progress-bar mode="indeterminate" *ngIf="connectState == 1"></mat-progress-bar>
+<div id="streams" *ngIf="connectState == 2">
+</div>
