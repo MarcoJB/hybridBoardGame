@@ -3,6 +3,7 @@ import {AR} from "../../libs/aruco";
 import {Message} from "../../datatypes/Message";
 import * as Peer from "../../libs/simplepeer";
 import {SocketService} from "../../services/socket/socket.service";
+import {PeerConnection} from "../../datatypes/PeerConnection";
 
 @Component({
   selector: "app-game",
@@ -63,12 +64,15 @@ export class GameComponent implements OnInit {
     });
   }
 
-  initiatePeerConnection(partnerUUID): Peer {
-    /*const peerConnection = new PeerConnection(this.socket, this.uuid, client, this.unescapedVideo.captureStream(10), true);
-      peerConnection.onMessage("stream", stream => {
-        this.createStreamVideo(client, stream);
-      });
-      this.peerConnections.push(peerConnection);*/
+  initiatePeerConnection(partnerUUID): void {
+    /*const peerConnection = new PeerConnection(this.socketService, this.uuid, partnerUUID);
+    peerConnection.on("stream", stream => {
+      this.createStreamVideo(partnerUUID, stream);
+    });
+    peerConnection.on("destroy", () => {
+
+    })
+    this.peers[partnerUUID] = peerConnection;*/
 
     const peerConnection = new Peer();
     peerConnection.on("signal", data => {
