@@ -4,6 +4,7 @@ import {Vector} from "../../datatypes/Vector";
 import {fx} from "../../libs/glfx";
 import {Message} from "../../datatypes/Message";
 import * as Peer from "../../libs/simplepeer";
+import {SocketService} from "../../services/socket/socket.service";
 
 @Component({
   selector: "app-mobile",
@@ -29,8 +30,9 @@ export class MobileComponent implements OnInit {
   };
   uuid: string;
   peers = {};
-  socket;
   debug = false;
+
+  constructor(private socketService: SocketService) { }
 
   public ngOnInit(): void {
     this.webcamVideo = document.createElement("video");
@@ -47,7 +49,7 @@ export class MobileComponent implements OnInit {
       document.getElementById("preview").parentNode.appendChild(this.unescapedVideo);
     }
 
-    this.connectSocketServer();
+    this.initiateSocketConnection();
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({video: true}).then(() => {
@@ -62,48 +64,33 @@ export class MobileComponent implements OnInit {
     requestAnimationFrame(() => this.tick());
   }
 
-  connectSocketServer(): void {
-    if (location.hostname === "localhost") {
-      this.socket = new WebSocket("ws://localhost:3000");
-    } else {
-      this.socket = new WebSocket("wss://beingbush.lynk.sh");
-    }
+  initiateSocketConnection(): void {
+    this.socketService.init();
 
-    this.socket.addEventListener("message", messageRaw => {
-      const message = JSON.parse(messageRaw.data);
-
-      switch (message.type) {
-        case "INIT":
-          this.uuid = message.data.uuid;
-          this.socket.send(JSON.stringify(new Message("HELLO", 1)));
-          console.log("Connected to Socket Server. UUID: " + this.uuid);
-          break;
-        case "HELLO":
-          if (message.data === 1) {
-            console.log("New Camera activated.");
-          } else {
-            this.initiatePeerConnection(message.from);
-            console.log("New Player joined.");
-          }
-          break;
-        case "REQUEST":
-          console.log("Offer request received from " + message.from);
-          this.initiatePeerConnection(message.from);
-          break;
-        case "ANSWER":
-          console.log("Received answer from " + message.from);
-          this.peers[message.from].signal(message.data);
-          break;
-        default:
-          console.log(message);
+    this.socketService.onMessage("INIT", (message: Message) => {
+      this.uuid = message.data.uuid;
+      this.socketService.send("HELLO", 1);
+      console.log("Connected to Socket Server. UUID: " + this.uuid);
+    }).onMessage("HELLO", (message: Message) => {
+      if (message.data === 1) {
+        console.log("New Camera activated.");
+      } else {
+        this.initiatePeerConnection(message.from);
+        console.log("New Player joined.");
       }
+    }).onMessage("REQUEST", (message: Message) => {
+      console.log("Offer request received from " + message.from);
+      this.initiatePeerConnection(message.from);
+    }).onMessage("ANSWER", (message: Message) => {
+      console.log("Received answer from " + message.from);
+      this.peers[message.from].signal(message.data);
     });
   }
 
   initiatePeerConnection(partnerUUID): Peer {
     const peerConnection = new Peer({initiator: true, streams: [this.unescapedVideo.captureStream(10)]});
     peerConnection.on("signal", data => {
-      this.socket.send(JSON.stringify(new Message("OFFER", data, partnerUUID)));
+      this.socketService.send("OFFER", data, partnerUUID);
     });
     peerConnection.on("connect", () => {
       console.log("Connected with " + partnerUUID);
@@ -245,7 +232,7 @@ export class MobileComponent implements OnInit {
       markers[1].center.x, markers[1].center.y,
       markers[2].center.x, markers[2].center.y,
       markers[3].center.x, markers[3].center.y
-    ], markerPositionsOnCanvas[0]).curves(
+    ], markerPositionsOnCanvas[3]).curves(
       [[0, 0], [white[0] / 255, 1]], [[0, 0], [white[1] / 255, 1]], [[0, 0], [white[2] / 255, 1]]).update();
   }
 

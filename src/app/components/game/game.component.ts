@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import {AR} from "../../libs/aruco";
 import {Message} from "../../datatypes/Message";
 import * as Peer from "../../libs/simplepeer";
+import {SocketService} from "../../services/socket/socket.service";
 
 @Component({
   selector: "app-game",
@@ -25,67 +26,53 @@ export class GameComponent implements OnInit {
   streamVideos = {};
   streamContexts = {};
   streamCanvas = {};
-  socket;
   debug = false;
   streamActive = {};
 
-  public ngOnInit(): void {
-  }
+  constructor(private socketService: SocketService) { }
+
+  public ngOnInit(): void { }
 
   init(): void {
     this.connectState = 1;
-    this.connectSocketServer();
+    this.initiateSocketConnection();
     requestAnimationFrame(() => this.tick());
   }
 
-  connectSocketServer(): void {
-    if (location.hostname === "localhost") {
-      this.socket = new WebSocket("ws://localhost:3000");
-    } else {
-      this.socket = new WebSocket("wss://beingbush.lynk.sh");
-    }
+  initiateSocketConnection(): void {
+    this.socketService.init();
 
-    this.socket.addEventListener("message", messageRaw => {
-      const message = JSON.parse(messageRaw.data);
-
-      switch (message.type) {
-        case "INIT":
-          this.connectState = 2;
-          this.uuid = message.data.uuid;
-          this.socket.send(JSON.stringify(new Message("HELLO", 0)));
-          console.log("Connected to Socket Server. UUID: " + this.uuid);
-          break;
-        case "HELLO":
-          if (message.data === 1) {
-            this.socket.send(JSON.stringify(new Message("REQUEST", null, message.from)));
-            console.log("New Camera activated.");
-          } else {
-            console.log("New Player joined.");
-          }
-          break;
-        case "OFFER":
-          console.log("Received Offer from " + message.from);
-          if (!this.peers.hasOwnProperty(message.from)) {
-            this.initiatePeerConnection(message.from);
-          }
-          this.peers[message.from].signal(message.data);
-          break;
-        default:
-          console.log(message);
+    this.socketService.onMessage("INIT", (message: Message) => {
+      this.connectState = 2;
+      this.uuid = message.data.uuid;
+      this.socketService.send("HELLO", 0);
+      console.log("Connected to Socket Server. UUID: " + this.uuid);
+    }).onMessage("HELLO", (message: Message) => {
+      if (message.data === 1) {
+        this.socketService.send("REQUEST", null, message.from);
+        console.log("New Camera activated.");
+      } else {
+        console.log("New Player joined.");
       }
+    }).onMessage("OFFER", (message: Message) => {
+      console.log("Received Offer from " + message.from);
+      if (!this.peers.hasOwnProperty(message.from)) {
+        this.initiatePeerConnection(message.from);
+      }
+      this.peers[message.from].signal(message.data);
     });
   }
 
   initiatePeerConnection(partnerUUID): Peer {
     /*const peerConnection = new PeerConnection(this.socket, this.uuid, client, this.unescapedVideo.captureStream(10), true);
-      peerConnection.on("stream", stream => {
+      peerConnection.onMessage("stream", stream => {
         this.createStreamVideo(client, stream);
       });
       this.peerConnections.push(peerConnection);*/
 
     const peerConnection = new Peer();
     peerConnection.on("signal", data => {
-      this.socket.send(JSON.stringify(new Message("ANSWER", data, partnerUUID)));
+      this.socketService.send("ANSWER", data, partnerUUID);
     });
     peerConnection.on("connect", () => {
       console.log("Connected with " + partnerUUID);
