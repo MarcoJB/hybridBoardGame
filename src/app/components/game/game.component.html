@@ -2,3 +2,4 @@
 <mat-progress-bar mode="indeterminate" *ngIf="connectState == 1"></mat-progress-bar>
 <div id="streams" *ngIf="connectState == 2">
 </div>
+<button id="diceButton" mat-raised-button color="primary" (click)="roll()" *ngIf="connectState == 2">Würfeln: {{diceValue}}</button>
