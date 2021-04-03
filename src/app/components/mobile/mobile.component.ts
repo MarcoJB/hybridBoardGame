@@ -37,6 +37,7 @@ export class MobileComponent implements OnInit {
 
   public ngOnInit(): void {
     this.webcamVideo = document.createElement("video");
+    this.webcamVideo.setAttribute("playsinline", true);
     this.analysedVideo = document.getElementById("analysed_video");
     this.analysedVideoContext = this.analysedVideo.getContext("2d");
     this.canvasFx = fx.canvas();
@@ -47,7 +48,9 @@ export class MobileComponent implements OnInit {
     this.unescapedVideoContext = this.unescapedVideo.getContext("2d");
 
     if (this.debug) {
-      document.getElementById("preview").parentNode.appendChild(this.unescapedVideo);
+      document.getElementById("preview").parentNode.parentNode.appendChild(this.webcamVideo);
+      document.getElementById("preview").parentNode.parentNode.appendChild(this.canvasFx);
+      document.getElementById("preview").parentNode.parentNode.appendChild(this.unescapedVideo);
     }
 
     this.initiateSocketConnection();
