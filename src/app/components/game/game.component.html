@@ -3,7 +3,8 @@
 <div id="streams" *ngIf="connectState == 2">
 </div>
 <div class="dice" (click)="roll()" *ngIf="connectState == 2">
-  <div class="die-list even-roll" [class.even-roll]="dieThrows % 2 + 1" [class.odd-roll]="dieThrows % 2" [attr.data-roll]="dieValue" id="die-1">
+  <div class="die-list even-roll" [class.even-roll]="dieThrows % 2 + 1" [class.odd-roll]="dieThrows % 2"
+       [attr.data-roll]="dieValue" (transitionend)="transitionEnd()" id="die-1">
     <div class="die-item" data-side="1">
       <span class="dot"></span>
     </div>
