@@ -31,11 +31,13 @@ export class MobileComponent implements OnInit {
   uuid: string;
   peers = {};
   debug = false;
+  stashedMarkers: object;
 
   constructor(private socketService: SocketService) { }
 
   public ngOnInit(): void {
     this.webcamVideo = document.createElement("video");
+    this.webcamVideo.setAttribute("playsinline", true);
     this.analysedVideo = document.getElementById("analysed_video");
     this.analysedVideoContext = this.analysedVideo.getContext("2d");
     this.canvasFx = fx.canvas();
@@ -46,7 +48,9 @@ export class MobileComponent implements OnInit {
     this.unescapedVideoContext = this.unescapedVideo.getContext("2d");
 
     if (this.debug) {
-      document.getElementById("preview").parentNode.appendChild(this.unescapedVideo);
+      document.getElementById("preview").parentNode.parentNode.appendChild(this.webcamVideo);
+      document.getElementById("preview").parentNode.parentNode.appendChild(this.canvasFx);
+      document.getElementById("preview").parentNode.parentNode.appendChild(this.unescapedVideo);
     }
 
     this.initiateSocketConnection();
@@ -146,8 +150,42 @@ export class MobileComponent implements OnInit {
       this.calculateCenters(markers);
       this.highlightMarkers(markers);
       if (Object.keys(markers).length === 4) {
+        this.stashMarkers(markers);
+      } else if (Object.keys(markers).length > 0) {
+        this.tryToUseStashedMarkers(markers);
+      }
+      if (Object.keys(markers).length === 4) {
         this.transformPerspectively(markers);
         this.unescapedVideoContext.drawImage(this.canvasFx, 0, 0);
+      }
+    }
+  }
+
+  stashMarkers(markers: object): void {
+    this.stashedMarkers = JSON.parse(JSON.stringify((markers)));
+  }
+
+  tryToUseStashedMarkers(markers: object): void {
+    if (!this.stashedMarkers) {
+      return;
+    }
+
+    let similar = true;
+
+    for (const marker of Object.keys(markers)) {
+      console.log(Math.sqrt(Math.pow(this.stashedMarkers[marker].center.x - markers[marker].center.x, 2) +
+        Math.pow(this.stashedMarkers[marker].center.y - markers[marker].center.y, 2)));
+      if (Math.sqrt(Math.pow(this.stashedMarkers[marker].center.x - markers[marker].center.x, 2) +
+        Math.pow(this.stashedMarkers[marker].center.y - markers[marker].center.y, 2)) >= 5) {
+        similar = false;
+      }
+    }
+
+    if (similar) {
+      for (const marker of Object.keys(this.stashedMarkers)) {
+        if (!markers.hasOwnProperty(marker)) {
+          markers[marker] = JSON.parse(JSON.stringify(this.stashedMarkers[marker]));
+        }
       }
     }
   }

@@ -29,6 +29,9 @@ export class GameComponent implements OnInit {
   streamCanvas = {};
   debug = false;
   streamActive = {};
+  dieValue = 1;
+  dieThrows = 0;
+  transitionRunning = false;
 
   constructor(private socketService: SocketService) { }
 
@@ -38,6 +41,19 @@ export class GameComponent implements OnInit {
     this.connectState = 1;
     this.initiateSocketConnection();
     requestAnimationFrame(() => this.tick());
+  }
+
+  roll(): void {
+    if (!this.transitionRunning) {
+      this.transitionRunning = true;
+      this.dieThrows++;
+      this.dieValue = Math.floor(Math.random() * 6) + 1;
+      this.socketService.send("DICE", this.dieValue);
+    }
+  }
+
+  transitionEnd(): void {
+    this.transitionRunning = false;
   }
 
   initiateSocketConnection(): void {
@@ -61,6 +77,10 @@ export class GameComponent implements OnInit {
         this.initiatePeerConnection(message.from);
       }
       this.peers[message.from].signal(message.data);
+    }).onMessage("DICE", (message: Message) => {
+      this.transitionRunning = true;
+      this.dieThrows++;
+      this.dieValue = message.data;
     });
   }
 

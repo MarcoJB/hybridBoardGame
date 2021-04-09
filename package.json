@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start_with_outside_access": "ng serve --disable-host-check",
+    "start_with_outside_access": "ng serve --disable-host-check --host 0.0.0.0",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
