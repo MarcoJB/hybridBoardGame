@@ -9,6 +9,12 @@
       content_paste
     </span>
   </button>
+  <div id="qrcode" (click)="QRCodeMinimized = !QRCodeMinimized" [class.minimized]="QRCodeMinimized">
+    <qrcode [qrdata]="this.url + '/' + this.uuid" [width]="256" elementType="svg"></qrcode>
+    <span class="material-icons">
+      search
+    </span>
+  </div>
   <div class="dice" (click)="roll()">
     <div class="die-list even-roll" [class.even-roll]="dieThrows % 2 + 1" [class.odd-roll]="dieThrows % 2"
          [attr.data-roll]="dieValue" (transitionend)="transitionEnd()" id="die-1">

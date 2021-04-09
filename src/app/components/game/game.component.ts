@@ -34,6 +34,7 @@ export class GameComponent implements OnInit {
   transitionRunning = false;
   channel:string;
   url: string;
+  QRCodeMinimized = true;
 
   constructor(private socketService: SocketService,
               private route: ActivatedRoute) {
