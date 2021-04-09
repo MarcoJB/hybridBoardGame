@@ -33,9 +33,12 @@ export class GameComponent implements OnInit {
   dieThrows = 0;
   transitionRunning = false;
   channel:string;
+  url: string;
 
   constructor(private socketService: SocketService,
-              private route: ActivatedRoute) { }
+              private route: ActivatedRoute) {
+    this.url = location.href;
+  }
 
   public ngOnInit(): void {
     this.channel = this.route.snapshot.paramMap.get("channel");
@@ -67,7 +70,7 @@ export class GameComponent implements OnInit {
       this.uuid = message.data.uuid;
       console.log("UUID assigned: " + this.uuid);
       this.socketService.send("JOIN", this.channel, "SERVER");
-    }).onMessage("JOINED", (message: Message) => {
+    }).onMessage("JOINED", () => {
       this.connectState = 2;
       this.socketService.send("HELLO", 0);
       console.log("Room joined: " + this.channel);
@@ -194,5 +197,9 @@ export class GameComponent implements OnInit {
         this.streamContexts[uuid].putImageData(frame, 0, 0);
       }
     }
+  }
+
+  copyUrlToClipboard(): void {
+    navigator.clipboard.writeText(this.url).then();
   }
 }
