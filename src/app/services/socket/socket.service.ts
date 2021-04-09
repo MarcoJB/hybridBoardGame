@@ -7,8 +7,7 @@ import {Message} from "../../datatypes/Message";
 export class SocketService {
   connected = false;
   uuid: string;
-  private readonly socketURI: string = location.hostname.indexOf("lynk") === -1 ? "ws://" + location.hostname + ":3000" : "wss://" +
-    "tracethick.lynk.sh";
+  private readonly socketURI: string = "wss://boardgameserver.batschkowski.de";
   private socket: WebSocket;
   private callbacks = {};
   private stashedMessages: Message[] = [];
