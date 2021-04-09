@@ -5,6 +5,7 @@ import {fx} from "../../libs/glfx";
 import {Message} from "../../datatypes/Message";
 import * as Peer from "../../libs/simplepeer";
 import {SocketService} from "../../services/socket/socket.service";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: "app-mobile",
@@ -32,10 +33,14 @@ export class MobileComponent implements OnInit {
   peers = {};
   debug = false;
   stashedMarkers: object;
+  channel: string;
 
-  constructor(private socketService: SocketService) { }
+  constructor(private socketService: SocketService,
+              private route: ActivatedRoute) { }
 
   public ngOnInit(): void {
+    this.channel = this.route.snapshot.paramMap.get("channel");
+
     this.webcamVideo = document.createElement("video");
     this.webcamVideo.setAttribute("playsinline", true);
     this.analysedVideo = document.getElementById("analysed_video");
@@ -73,8 +78,11 @@ export class MobileComponent implements OnInit {
 
     this.socketService.onMessage("INIT", (message: Message) => {
       this.uuid = message.data.uuid;
+      console.log("UUID assigned: " + this.uuid);
+      this.socketService.send("JOIN", this.channel, "SERVER");
+    }).onMessage("JOINED", () => {
       this.socketService.send("HELLO", 1);
-      console.log("Connected to Socket Server. UUID: " + this.uuid);
+      console.log("Room joined: " + this.channel);
     }).onMessage("HELLO", (message: Message) => {
       if (message.data === 1) {
         console.log("New Camera activated.");

@@ -3,7 +3,7 @@ import {AR} from "../../libs/aruco";
 import {Message} from "../../datatypes/Message";
 import * as Peer from "../../libs/simplepeer";
 import {SocketService} from "../../services/socket/socket.service";
-import {PeerConnection} from "../../datatypes/PeerConnection";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: "app-game",
@@ -32,10 +32,18 @@ export class GameComponent implements OnInit {
   dieValue = 1;
   dieThrows = 0;
   transitionRunning = false;
+  channel:string;
+  url: string;
+  QRCodeMinimized = true;
 
-  constructor(private socketService: SocketService) { }
+  constructor(private socketService: SocketService,
+              private route: ActivatedRoute) {
+    this.url = location.href;
+  }
 
-  public ngOnInit(): void { }
+  public ngOnInit(): void {
+    this.channel = this.route.snapshot.paramMap.get("channel");
+  }
 
   init(): void {
     this.connectState = 1;
@@ -60,19 +68,22 @@ export class GameComponent implements OnInit {
     this.socketService.init();
 
     this.socketService.onMessage("INIT", (message: Message) => {
-      this.connectState = 2;
       this.uuid = message.data.uuid;
+      console.log("UUID assigned: " + this.uuid);
+      this.socketService.send("JOIN", this.channel, "SERVER");
+    }).onMessage("JOINED", () => {
+      this.connectState = 2;
       this.socketService.send("HELLO", 0);
-      console.log("Connected to Socket Server. UUID: " + this.uuid);
+      console.log("Room joined: " + this.channel);
     }).onMessage("HELLO", (message: Message) => {
       if (message.data === 1) {
         this.socketService.send("REQUEST", null, message.from);
-        console.log("New Camera activated.");
+        console.log("New camera activated.");
       } else {
-        console.log("New Player joined.");
+        console.log("New player joined.");
       }
     }).onMessage("OFFER", (message: Message) => {
-      console.log("Received Offer from " + message.from);
+      console.log("Received offer from " + message.from);
       if (!this.peers.hasOwnProperty(message.from)) {
         this.initiatePeerConnection(message.from);
       }
@@ -187,5 +198,9 @@ export class GameComponent implements OnInit {
         this.streamContexts[uuid].putImageData(frame, 0, 0);
       }
     }
+  }
+
+  copyUrlToClipboard(): void {
+    navigator.clipboard.writeText(this.url).then();
   }
 }

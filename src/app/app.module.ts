@@ -15,12 +15,15 @@ import { MobileComponent } from "./components/mobile/mobile.component";
 import { GameComponent } from "./components/game/game.component";
 import { AppRoutingModule } from "./app-routing.module";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
+import { HomeComponent } from "./components/home/home.component";
+import {QRCodeModule} from "angularx-qrcode";
 
 @NgModule({
   declarations: [
     AppComponent,
     MobileComponent,
-    GameComponent
+    GameComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +37,8 @@ import {MatProgressBarModule} from "@angular/material/progress-bar";
     MatSelectModule,
     MatButtonModule,
     AppRoutingModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    QRCodeModule
   ],
   providers: [],
   bootstrap: [AppComponent]

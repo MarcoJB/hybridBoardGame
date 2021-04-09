@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+:host > * {
+  width: 300px;
+  max-width: 100%;
+}
+
+:host button {
+  margin-bottom: 10px;
+}
