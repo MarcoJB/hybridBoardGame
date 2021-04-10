@@ -34,12 +34,14 @@ export class MobileComponent implements OnInit {
   debug = false;
   stashedMarkers: object;
   channel: string;
+  playerUUID: string;
 
   constructor(private socketService: SocketService,
               private route: ActivatedRoute) { }
 
   public ngOnInit(): void {
     this.channel = this.route.snapshot.paramMap.get("channel");
+    this.playerUUID = this.route.snapshot.paramMap.get("playerUUID");
 
     this.webcamVideo = document.createElement("video");
     this.webcamVideo.setAttribute("playsinline", true);
@@ -81,14 +83,21 @@ export class MobileComponent implements OnInit {
       console.log("UUID assigned: " + this.uuid);
       this.socketService.send("JOIN", this.channel, "SERVER");
     }).onMessage("JOINED", () => {
-      this.socketService.send("HELLO", 1);
+      this.socketService.send("HELLO", {
+        camera: true,
+        playerUUID: this.playerUUID
+      });
       console.log("Room joined: " + this.channel);
     }).onMessage("HELLO", (message: Message) => {
-      if (message.data === 1) {
-        console.log("New Camera activated.");
+      if (message.data.camera) {
+        console.log("New camera activated: " + message.from);
       } else {
         this.initiatePeerConnection(message.from);
-        console.log("New Player joined.");
+        console.log("New player joined: " + message.from);
+        this.socketService.send("WELCOME", {
+          camera: true,
+          playerUUID: this.playerUUID
+        });
       }
     }).onMessage("REQUEST", (message: Message) => {
       console.log("Offer request received from " + message.from);

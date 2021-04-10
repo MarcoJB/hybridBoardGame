@@ -35,6 +35,7 @@ export class GameComponent implements OnInit {
   channel:string;
   url: string;
   QRCodeMinimized = true;
+  cameraUUID: string;
 
   constructor(private socketService: SocketService,
               private route: ActivatedRoute) {
@@ -67,20 +68,43 @@ export class GameComponent implements OnInit {
   initiateSocketConnection(): void {
     this.socketService.init();
 
+    if (localStorage.getItem("uuid") !== null) {
+      console.log("UUID loaded from localStorage: " + localStorage.getItem("uuid"));
+      this.socketService.send("UUID", localStorage.getItem("uuid"), "SERVER");
+    }
+
     this.socketService.onMessage("INIT", (message: Message) => {
-      this.uuid = message.data.uuid;
-      console.log("UUID assigned: " + this.uuid);
-      this.socketService.send("JOIN", this.channel, "SERVER");
+      if (localStorage.getItem("uuid") === null || localStorage.getItem("uuid") === message.data.uuid) {
+        this.uuid = message.data.uuid;
+        localStorage.setItem("uuid", this.uuid);
+        console.log("UUID assigned: " + this.uuid);
+        this.socketService.send("JOIN", this.channel, "SERVER");
+      }
     }).onMessage("JOINED", () => {
       this.connectState = 2;
-      this.socketService.send("HELLO", 0);
+      this.socketService.send("HELLO", {camera: false});
       console.log("Room joined: " + this.channel);
     }).onMessage("HELLO", (message: Message) => {
-      if (message.data === 1) {
+      if (message.data.camera) {
         this.socketService.send("REQUEST", null, message.from);
-        console.log("New camera activated.");
+        console.log("New camera activated: " + message.from);
+
+        if (message.data.playerUUID === this.uuid) {
+          this.cameraUUID = message.from;
+          console.log("Camera linked: " + message.from);
+        }
       } else {
-        console.log("New player joined.");
+        console.log("New player joined: " + message.from);
+        this.socketService.send("WELCOME", {camera: false});
+      }
+    }).onMessage("WELCOME", (message: Message) => {
+      if (message.data.camera) {
+        if (message.data.playerUUID === this.uuid) {
+          this.cameraUUID = message.from;
+          console.log("Camera linked: " + message.from);
+        }
+      } else {
+
       }
     }).onMessage("OFFER", (message: Message) => {
       console.log("Received offer from " + message.from);

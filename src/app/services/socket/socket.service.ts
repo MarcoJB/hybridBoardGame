@@ -27,7 +27,11 @@ export class SocketService {
 
     this.socket.addEventListener("message", messageRaw => {
       const message: Message = JSON.parse(messageRaw.data);
-      this.callbacks[message.type]?.forEach(callback => callback(message));
+      if (this.callbacks.hasOwnProperty(message.type)) {
+        this.callbacks[message.type].forEach(callback => callback(message));
+      } else {
+        console.log(message);
+      }
     });
   }
 

@@ -5,7 +5,7 @@ import {GameComponent} from "./components/game/game.component";
 import {HomeComponent} from "./components/home/home.component";
 
 const routes: Routes = [
-  { path: ":channel/:playerId", component: MobileComponent },
+  { path: ":channel/:playerUUID", component: MobileComponent },
   { path: ":channel", component: GameComponent },
   { path: "",   component: HomeComponent }
 ];
