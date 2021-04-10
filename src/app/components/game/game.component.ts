@@ -4,6 +4,7 @@ import {Message} from "../../datatypes/Message";
 import * as Peer from "../../libs/simplepeer";
 import {SocketService} from "../../services/socket/socket.service";
 import {ActivatedRoute} from "@angular/router";
+import {GameService} from "../../services/game/game.service";
 
 @Component({
   selector: "app-game",
@@ -11,44 +12,31 @@ import {ActivatedRoute} from "@angular/router";
   styleUrls: ["./game.component.css"]
 })
 export class GameComponent implements OnInit {
-  connectState = 0;
-  distanceExponent = 2.4;
-  tolerance = 210;
-  selectedMediaDeviceId: string;
-  detector: AR.Detector;
-  selectedColors = [[230, 230, 230], [200, 200, 200], [175, 175, 175]];
-  dimensions = {
-    aruco: 37,
-    central: 170,
-    distance: 4
-  };
-  uuid: string;
-  peers = {};
-  streamVideos = {};
-  streamContexts = {};
-  streamCanvas = {};
-  debug = false;
-  streamActive = {};
   dieValue = 1;
   dieThrows = 0;
   transitionRunning = false;
-  channel:string;
   url: string;
-  QRCodeMinimized = true;
-  cameraUUID: string;
 
   constructor(private socketService: SocketService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              public gameService: GameService) {
     this.url = location.href;
   }
 
   public ngOnInit(): void {
-    this.channel = this.route.snapshot.paramMap.get("channel");
+    this.gameService.channel = this.route.snapshot.paramMap.get("channel");
   }
 
   init(): void {
-    this.connectState = 1;
-    this.initiateSocketConnection();
+    this.gameService.connectState = 1;
+    this.gameService.initiateSocketConnection();
+
+    this.socketService.onMessage("DICE", (message: Message) => {
+      this.transitionRunning = true;
+      this.dieThrows++;
+      this.dieValue = message.data;
+    });
+
     requestAnimationFrame(() => this.tick());
   }
 
@@ -65,161 +53,31 @@ export class GameComponent implements OnInit {
     this.transitionRunning = false;
   }
 
-  initiateSocketConnection(): void {
-    this.socketService.init();
-
-    if (localStorage.getItem("uuid") !== null) {
-      console.log("UUID loaded from localStorage: " + localStorage.getItem("uuid"));
-      this.socketService.send("UUID", localStorage.getItem("uuid"), "SERVER");
-    }
-
-    this.socketService.onMessage("INIT", (message: Message) => {
-      if (localStorage.getItem("uuid") === null || localStorage.getItem("uuid") === message.data.uuid) {
-        this.uuid = message.data.uuid;
-        localStorage.setItem("uuid", this.uuid);
-        console.log("UUID assigned: " + this.uuid);
-        this.socketService.send("JOIN", this.channel, "SERVER");
-      }
-    }).onMessage("JOINED", () => {
-      this.connectState = 2;
-      this.socketService.send("HELLO", {camera: false});
-      console.log("Room joined: " + this.channel);
-    }).onMessage("HELLO", (message: Message) => {
-      if (message.data.camera) {
-        this.socketService.send("REQUEST", null, message.from);
-        console.log("New camera activated: " + message.from);
-
-        if (message.data.playerUUID === this.uuid) {
-          this.cameraUUID = message.from;
-          console.log("Camera linked: " + message.from);
-        }
-      } else {
-        console.log("New player joined: " + message.from);
-        this.socketService.send("WELCOME", {camera: false});
-      }
-    }).onMessage("WELCOME", (message: Message) => {
-      if (message.data.camera) {
-        if (message.data.playerUUID === this.uuid) {
-          this.cameraUUID = message.from;
-          console.log("Camera linked: " + message.from);
-        }
-      } else {
-
-      }
-    }).onMessage("OFFER", (message: Message) => {
-      console.log("Received offer from " + message.from);
-      if (!this.peers.hasOwnProperty(message.from)) {
-        this.initiatePeerConnection(message.from);
-      }
-      this.peers[message.from].signal(message.data);
-    }).onMessage("DICE", (message: Message) => {
-      this.transitionRunning = true;
-      this.dieThrows++;
-      this.dieValue = message.data;
-    });
-  }
-
-  initiatePeerConnection(partnerUUID): void {
-    /*const peerConnection = new PeerConnection(this.socketService, this.uuid, partnerUUID);
-    peerConnection.on("stream", stream => {
-      this.createStreamVideo(partnerUUID, stream);
-    });
-    peerConnection.on("destroy", () => {
-
-    })
-    this.peers[partnerUUID] = peerConnection;*/
-
-    const peerConnection = new Peer();
-    peerConnection.on("signal", data => {
-      this.socketService.send("ANSWER", data, partnerUUID);
-    });
-    peerConnection.on("connect", () => {
-      console.log("Connected with " + partnerUUID);
-    });
-    peerConnection.on("stream", stream => {
-      console.log("Stream incoming from " + partnerUUID);
-      this.createStreamVideo(partnerUUID, stream);
-    });
-    peerConnection.on("error", (e) => {
-      console.log("Error with " + partnerUUID + ": ", e);
-      this.destroyPeerConnection(partnerUUID);
-    });
-    peerConnection.on("close", () => {
-      console.log("Connection closed from " + partnerUUID);
-      this.destroyPeerConnection(partnerUUID);
-    });
-    this.peers[partnerUUID] = peerConnection;
-
-    return peerConnection;
-  }
-
-  destroyPeerConnection(partnerUUID): void {
-    if (partnerUUID in this.peers) {
-      this.streamVideos[partnerUUID].remove();
-      this.streamCanvas[partnerUUID].remove();
-      this.peers[partnerUUID].destroy();
-      delete this.peers[partnerUUID];
-      delete this.streamVideos[partnerUUID];
-      delete this.streamContexts[partnerUUID];
-      delete this.streamCanvas[partnerUUID];
-    }
-  }
-
-  createStreamVideo(client: string, stream): void {
-    this.streamActive[client] = false;
-
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    video.play();
-    this.streamVideos[client] = video;
-    if (this.debug) {
-      document.getElementById("streams").parentNode.appendChild(video);
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 480;
-    canvas.height = 480;
-    this.streamCanvas[client] = canvas;
-    this.streamContexts[client] = canvas.getContext("2d");
-  }
-
   tick(): void {
     requestAnimationFrame(() => this.tick());
     this.updateRemoteVideos();
   }
 
-  escapeImageData(imageData, filterColors): void {
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const diff: number[] = [];
-
-      for (const filterColor of filterColors) {
-        diff.push(Math.sqrt(
-          Math.pow(imageData.data[i] - filterColor[0], 2) +
-          Math.pow(imageData.data[i + 1] - filterColor[1], 2) +
-          Math.pow(imageData.data[i + 2] - filterColor[2], 2)
-        ));
+  updateRemoteVideos(): void {
+    for (const uuid of Object.keys(this.gameService.cameras)) {
+      if (this.gameService.cameras[uuid].context === undefined) {
+        continue;
       }
 
-      imageData.data[i + 3] = Math.min(255, Math.pow(Math.min(...diff), this.distanceExponent) / this.tolerance);
-    }
-  }
+      this.gameService.cameras[uuid].context.drawImage(this.gameService.cameras[uuid].video, 0, 0, 480, 480);
 
-  updateRemoteVideos(): void {
-    for (const uuid of Object.keys(this.streamVideos)) {
-      this.streamContexts[uuid].drawImage(this.streamVideos[uuid], 0, 0, 480, 480);
-
-      if (!this.streamActive[uuid]) {
-        const imgData = this.streamContexts[uuid].getImageData(0, 0, 1, 1).data;
+      if (!this.gameService.cameras[uuid].streamActive) {
+        const imgData = this.gameService.cameras[uuid].context.getImageData(0, 0, 1, 1).data;
         if (Math.max(imgData[0], imgData[1], imgData[2]) > 0) {
-          this.streamActive[uuid] = true;
-          document.getElementById("streams").appendChild(this.streamCanvas[uuid]);
+          this.gameService.cameras[uuid].streamActive = true;
+          document.getElementById("streams").appendChild(this.gameService.cameras[uuid].canvas);
         }
       }
 
-      if (this.streamContexts[uuid] && this.selectedColors) {
-        const frame = this.streamContexts[uuid].getImageData(0, 0, 480, 480);
-        this.escapeImageData(frame, this.selectedColors);
-        this.streamContexts[uuid].putImageData(frame, 0, 0);
+      if (this.gameService.cameras[uuid].context && this.gameService.cameras[uuid].selectedColors) {
+        const frame = this.gameService.cameras[uuid].context.getImageData(0, 0, 480, 480);
+        this.gameService.escapeImageData(frame, this.gameService.cameras[uuid].selectedColors);
+        this.gameService.cameras[uuid].context.putImageData(frame, 0, 0);
       }
     }
   }

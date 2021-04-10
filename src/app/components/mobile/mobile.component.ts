@@ -97,7 +97,7 @@ export class MobileComponent implements OnInit {
         this.socketService.send("WELCOME", {
           camera: true,
           playerUUID: this.playerUUID
-        });
+        }, message.from);
       }
     }).onMessage("REQUEST", (message: Message) => {
       console.log("Offer request received from " + message.from);

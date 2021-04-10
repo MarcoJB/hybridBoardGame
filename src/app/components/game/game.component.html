@@ -1,13 +1,13 @@
-<button mat-raised-button color="primary" (click)="init()" *ngIf="connectState == 0">Connect</button>
-<mat-progress-bar mode="indeterminate" *ngIf="connectState == 1"></mat-progress-bar>
-<div id="content" *ngIf="connectState == 2">
-  <div id="qrcode" [class.hidden]="cameraUUID">
-    <qrcode [qrdata]="this.url + '/' + this.uuid" [width]="200" elementType="svg"></qrcode>
+<button mat-raised-button color="primary" (click)="init()" *ngIf="gameService.connectState == 0">Connect</button>
+<mat-progress-bar mode="indeterminate" *ngIf="gameService.connectState == 1"></mat-progress-bar>
+<div id="content" *ngIf="gameService.connectState == 2">
+  <div id="qrcode" [class.hidden]="gameService.cameraUUID">
+    <qrcode [qrdata]="url + '/' + gameService.uuid" [width]="200" elementType="svg"></qrcode>
     <span class="material-icons">
       linked_camera
     </span>
   </div>
-  <button id="camera-button" mat-raised-button color="primary" [disabled]="!cameraUUID">Camera settings</button>
+  <button id="camera-button" mat-raised-button color="primary" [disabled]="!gameService.cameraUUID">Camera settings</button>
   <div id="streams">
   </div>
   <button id="link-button" mat-stroked-button (click)="copyUrlToClipboard()">
