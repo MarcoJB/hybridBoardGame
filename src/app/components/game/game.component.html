@@ -1,20 +1,21 @@
 <button mat-raised-button color="primary" (click)="init()" *ngIf="connectState == 0">Connect</button>
 <mat-progress-bar mode="indeterminate" *ngIf="connectState == 1"></mat-progress-bar>
-<ng-container *ngIf="connectState == 2">
+<div id="content" *ngIf="connectState == 2">
+  <div id="qrcode" [class.hidden]="cameraUUID">
+    <qrcode [qrdata]="this.url + '/' + this.uuid" [width]="200" elementType="svg"></qrcode>
+    <span class="material-icons">
+      linked_camera
+    </span>
+  </div>
+  <button id="camera-button" mat-raised-button color="primary" [disabled]="!cameraUUID">Camera settings</button>
   <div id="streams">
   </div>
-  <button mat-stroked-button (click)="copyUrlToClipboard()">
+  <button id="link-button" mat-stroked-button (click)="copyUrlToClipboard()">
     {{url}}
     <span class="material-icons">
       content_paste
     </span>
   </button>
-  <div id="qrcode" (click)="QRCodeMinimized = !QRCodeMinimized" [class.minimized]="QRCodeMinimized">
-    <qrcode [qrdata]="this.url + '/' + this.uuid" [width]="256" elementType="svg"></qrcode>
-    <span class="material-icons">
-      search
-    </span>
-  </div>
   <div class="dice" (click)="roll()">
     <div class="die-list even-roll" [class.even-roll]="dieThrows % 2 + 1" [class.odd-roll]="dieThrows % 2"
          [attr.data-roll]="dieValue" (transitionend)="transitionEnd()" id="die-1">
@@ -53,4 +54,4 @@
       </div>
     </div>
   </div>
-</ng-container>
+</div>
