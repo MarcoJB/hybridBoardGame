@@ -143,4 +143,13 @@ export class GameService {
       imageData.data[i + 3] = Math.min(255, Math.pow(Math.min(...diff), this.distanceExponent) / this.tolerance);
     }
   }
+
+  getCameraByPlayerUUID(playerUUID: string): Camera {
+    for (let cameraUUID in this.cameras) {
+      if (this.cameras[cameraUUID].playerUUID === playerUUID) {
+        return this.cameras[cameraUUID];
+      }
+    }
+    return null;
+  }
 }

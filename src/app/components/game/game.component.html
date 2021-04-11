@@ -7,7 +7,8 @@
       linked_camera
     </span>
   </div>
-  <button id="camera-button" mat-raised-button color="primary" [disabled]="!gameService.cameraUUID">Camera settings</button>
+  <button id="camera-button" mat-raised-button color="primary" [disabled]="!gameService.cameraUUID"
+          (click)="openCameraConfig()">Camera config</button>
   <div id="streams">
   </div>
   <button id="link-button" mat-stroked-button (click)="copyUrlToClipboard()">

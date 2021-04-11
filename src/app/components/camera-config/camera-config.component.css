@@ -1,0 +1,62 @@
+:host {
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "title . close"
+    "stream colors colors";
+  align-items: start;
+}
+
+.mat-dialog-title {
+  grid-area: title;
+}
+
+.mat-dialog-title h2 {
+  margin: 0;
+}
+
+.close-icon {
+  grid-area: close;
+}
+
+#stream {
+  position: relative;
+  height: 100%;
+  grid-area: stream;
+  overflow: hidden;
+}
+
+#stream img {
+  height: 100%;
+}
+
+#stream canvas, #stream video {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+#streams .stream {
+  width: 100%;
+  height: 100%;
+}
+
+#colors {
+  grid-area: colors;
+}
+
+#colors .color {
+  display: flex;
+}
+
+#colors .color-preview {
+  width: 30px;
+  height: 30px;
+  margin: 10px;
+  background-color: red;
+}

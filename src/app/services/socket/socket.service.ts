@@ -7,7 +7,8 @@ import {Message} from "../../datatypes/Message";
 export class SocketService {
   connected = false;
   uuid: string;
-  private readonly socketURI: string = "wss://boardgameserver.batschkowski.de";
+  private readonly socketURI: string = "wss://boardgameserver.marco93.de";
+  // private readonly socketURI: string = "ws://localhost:3000";
   private socket: WebSocket;
   private callbacks = {};
   private stashedMessages: Message[] = [];

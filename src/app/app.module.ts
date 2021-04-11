@@ -17,13 +17,16 @@ import { AppRoutingModule } from "./app-routing.module";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import { HomeComponent } from "./components/home/home.component";
 import {QRCodeModule} from "angularx-qrcode";
+import { CameraConfigComponent } from "./components/camera-config/camera-config.component";
+import {MatDialogModule} from "@angular/material/dialog";
 
 @NgModule({
   declarations: [
     AppComponent,
     MobileComponent,
     GameComponent,
-    HomeComponent
+    HomeComponent,
+    CameraConfigComponent
   ],
   imports: [
     BrowserModule,
@@ -38,9 +41,12 @@ import {QRCodeModule} from "angularx-qrcode";
     MatButtonModule,
     AppRoutingModule,
     MatProgressBarModule,
-    QRCodeModule
+    QRCodeModule,
+    MatDialogModule
   ],
-  providers: [],
+  providers: [
+
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

@@ -1,10 +1,10 @@
 import { Component, OnInit } from "@angular/core";
-import {AR} from "../../libs/aruco";
 import {Message} from "../../datatypes/Message";
-import * as Peer from "../../libs/simplepeer";
 import {SocketService} from "../../services/socket/socket.service";
 import {ActivatedRoute} from "@angular/router";
 import {GameService} from "../../services/game/game.service";
+import {MatDialog} from "@angular/material/dialog";
+import {CameraConfigComponent} from "../camera-config/camera-config.component";
 
 @Component({
   selector: "app-game",
@@ -19,7 +19,8 @@ export class GameComponent implements OnInit {
 
   constructor(private socketService: SocketService,
               private route: ActivatedRoute,
-              public gameService: GameService) {
+              public gameService: GameService,
+              private dialog: MatDialog) {
     this.url = location.href;
   }
 
@@ -84,5 +85,17 @@ export class GameComponent implements OnInit {
 
   copyUrlToClipboard(): void {
     navigator.clipboard.writeText(this.url).then();
+  }
+
+  openCameraConfig(): void {
+    const dialogRef = this.dialog.open(CameraConfigComponent, {
+      width: "90vw",
+      height: "90vh",
+      maxWidth: "none"
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
   }
 }
