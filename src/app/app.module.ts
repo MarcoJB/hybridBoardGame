@@ -19,6 +19,7 @@ import { HomeComponent } from "./components/home/home.component";
 import {QRCodeModule} from "angularx-qrcode";
 import { CameraConfigComponent } from "./components/camera-config/camera-config.component";
 import {MatDialogModule} from "@angular/material/dialog";
+import {MatIconModule} from "@angular/material/icon";
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import {MatDialogModule} from "@angular/material/dialog";
     AppRoutingModule,
     MatProgressBarModule,
     QRCodeModule,
-    MatDialogModule
+    MatDialogModule,
+    MatIconModule
   ],
   providers: [
 

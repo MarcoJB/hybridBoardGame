@@ -1,31 +1,35 @@
 :host {
   height: 100%;
   display: grid;
-  grid-template-columns: auto 1fr auto;
   grid-template-rows: auto 1fr;
-  grid-template-areas:
-    "title . close"
-    "stream colors colors";
-  align-items: start;
+}
+
+:host mat-icon {
+  color: #aaaaaa;
 }
 
 .mat-dialog-title {
-  grid-area: title;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-flow: column;
 }
 
 .mat-dialog-title h2 {
   margin: 0;
 }
 
-.close-icon {
-  grid-area: close;
+mat-dialog-content {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  max-height: none;
 }
 
 #stream {
   position: relative;
   height: 100%;
-  grid-area: stream;
   overflow: hidden;
+  cursor: copy;
 }
 
 #stream img {
@@ -47,16 +51,36 @@
 }
 
 #colors {
-  grid-area: colors;
-}
-
-#colors .color {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  row-gap: 10px;
+  margin-left: 10px;
 }
 
 #colors .color-preview {
-  width: 30px;
-  height: 30px;
-  margin: 10px;
+  padding: 10px;
+  border: solid 1px #ccc;
+  border-radius: 10px 0 0 10px;
+}
+
+#colors .color-preview div {
+  width: 25px;
+  height: 25px;
   background-color: red;
+  border-radius: 5px;
+}
+
+#colors .color-text {
+  display: flex;
+  align-items: center;
+  border: solid #ccc;
+  border-width: 1px 1px 1px 0;
+  padding-left: 10px;
+  border-radius: 0 10px 10px 0;
+}
+
+#colors button {
+  align-self: center;
+  margin-left: 10px;
+  color: #aaaaaa;
 }

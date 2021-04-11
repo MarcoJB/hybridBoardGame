@@ -1,15 +1,32 @@
-<h2 mat-dialog-title>Camera config</h2>
-<button mat-button class="close-icon" [mat-dialog-close]="true">
-    <span class="material-icons">
-      close
-    </span>
-</button>
-<div id="stream">
-  <img src="../../../assets/mensch_aergere_dich_nicht.png">
-  <canvas id="preview" width="480" height="480"></canvas>
+<div mat-dialog-title>
+  <h2>Camera config</h2>
+  <button mat-icon-button (click)="preview=!preview">
+    <mat-icon>{{preview?"visibility":"visibility_off"}}</mat-icon>
+  </button>
+  <button mat-icon-button [mat-dialog-close]="true">
+    <mat-icon>close</mat-icon>
+  </button>
 </div>
-<div id="colors">
-  <div class="color">
-    <div class="color-preview"></div>
+<mat-dialog-content>
+  <div id="stream" (click)="addColor($event)">
+    <img src="../../../assets/mensch_aergere_dich_nicht.png">
+    <canvas id="preview" width="480" height="480"></canvas>
   </div>
-</div>
+  <div id="colors">
+    <ng-container *ngFor="let selectedColor of gameService.cameras[gameService.cameraUUID]?.selectedColors | keyvalue">
+      <div class="color-preview">
+        <div [style.backgroundColor]="'rgb('+selectedColor.value[0]+', '+selectedColor.value[1]+', '+
+        selectedColor.value[2]+')'"></div>
+      </div>
+      <div class="color-text">
+        <span>
+          #{{selectedColor.value[0].toString(16)}}{{selectedColor.value[1].toString(16)}}{{
+          selectedColor.value[2].toString(16)}}
+        </span>
+      </div>
+      <button mat-icon-button (click)="removeColor(selectedColor.key)">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+    </ng-container>
+  </div>
+</mat-dialog-content>
